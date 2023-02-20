@@ -1,11 +1,30 @@
 import random
+import traceback
 
 import numpy as np
+
 
 CROSSOVER_INDEX = 3
 CROSSOVER_PROB = 0.5
 MUTATION_PROB = 0.5
 INDIVIDUAL_SIZE = 8
+ELITE_SIZE = 5
+
+
+def top_n(individuals, num):
+    """
+    Retorna os top num indivíduos de acordo com a função de avaliação. Se num for
+    igual a 1, retorna apenas o indivíduo (sem estar contido em uma lista).
+
+    :param individuals: list
+    :param num: int
+    :return: Union[list[list], list[int]] top n indivíduos
+    """
+    if num == 1:
+        top_n_individuals = np.array(sorted(individuals, key=evaluate))[0]
+    else:
+        top_n_individuals = np.array(sorted(individuals, key=evaluate))[:num]
+    return top_n_individuals
 
 
 def evaluate(individual: np.array):
@@ -25,6 +44,21 @@ def evaluate(individual: np.array):
     return conflicts
 
 
+def select(population, k):
+    """
+    Seleciona os 2 melhores indivíduos de uma fatia aleatória da população.
+
+    :param population: list lista de indivíduos
+    :param k: int número de participantes do torneio
+    :return: tuple tupla com os 2 melhores indivíduos da fatia selecionada
+    """
+    participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
+    p1 = tournament(population[participants_idx, :])
+    participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
+    p2 = tournament(population[participants_idx, :])
+    return p1, p2
+
+
 def tournament(participants: np.array):
     """
     Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
@@ -32,8 +66,7 @@ def tournament(participants: np.array):
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
-    ordered_participants = np.array(sorted(participants, key=evaluate))
-    return ordered_participants[0]
+    return top_n(participants, 1)
 
 
 def crossover(parent1, parent2, index):
@@ -88,16 +121,13 @@ def run_ga(g, n, k, m, e):
     population = np.random.randint(low = 1, high=9, size=(n, INDIVIDUAL_SIZE), dtype=np.dtype('i1'))
 
     for i in range(g):
-        new_population = np.array(sorted(population, key=evaluate))[:e]
-        while len(new_population) < n:
-            participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
-            p1 = tournament(population[participants_idx, :])
-            participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
-            p2 = tournament(population[participants_idx, :])
+        new_population = top_n(population, e)
+        while new_population.shape[0] < n:
+            p1, p2 = select(population, k)
             o1, o2 = crossover(p1, p2, CROSSOVER_INDEX)
-            m1, m2 = mutate(o1, MUTATION_PROB), mutate(o2, MUTATION_PROB)
-            new_population = np.append(new_population, m1)
-            new_population = np.append(new_population, m2)
-            break
+            m1, m2 = mutate(o1, m), mutate(o2, m)
+            new_population = np.vstack([new_population, m1, m2])
+        population = new_population.copy()
+    return top_n(population, 1)
     
-run_ga(10, 10000, 2, 0.3, 5)
+print(run_ga(10, 100, 2, MUTATION_PROB, ELITE_SIZE))
