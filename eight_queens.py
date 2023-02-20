@@ -75,7 +75,10 @@ def run_ga(g, n, k, m, e):
         new_population = np.empty(shape=(0, 0), dtype=np.dtype('u1'))
         while len(new_population) < n:
             participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
-            selected_individual = tournament(population[participants_idx, :])
+            p1 = tournament(population[participants_idx, :])
+            participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
+            p2 = tournament(population[participants_idx, :])
+
             break
 
     print(population)
