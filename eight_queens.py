@@ -85,10 +85,10 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    population = np.random.randint(low = 1, high=9, size=(n, INDIVIDUAL_SIZE), dtype=np.dtype('u1'))
+    population = np.random.randint(low = 1, high=9, size=(n, INDIVIDUAL_SIZE), dtype=np.dtype('i1'))
 
     for i in range(g):
-        new_population = np.empty(shape=(0, 0), dtype=np.dtype('u1'))
+        new_population = np.array(sorted(population, key=evaluate))[:e]
         while len(new_population) < n:
             participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
             p1 = tournament(population[participants_idx, :])
