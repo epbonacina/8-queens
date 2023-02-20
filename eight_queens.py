@@ -1,4 +1,8 @@
-def evaluate(individual):
+import numpy as np
+from numba import jit
+
+@jit(nopython=True)
+def evaluate(individual: np.array):
     """
     Recebe um indivíduo (lista de inteiros) e retorna o número de ataques
     entre rainhas na configuração especificada pelo indivíduo.
@@ -8,20 +12,22 @@ def evaluate(individual):
     :return:int numero de ataques entre rainhas no individuo recebido
     """
     conflicts = 0
-    for i in range(len(individual)):
-        for j in range(i+1, len(individual)):
+    for i in range(individual.shape[0]):
+        for j in range(i+1, individual.shape[0]):
             if individual[i] == individual[j] or abs(i-j) == abs(individual[i] - individual[j]):
                 conflicts += 1
     return conflicts
 
-def tournament(participants):
+
+def tournament(participants: np.array):
     """
     Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
     ao numero de conflitos
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    ordered_participants = np.array(sorted(participants, key=evaluate))
+    return ordered_participants[0]
 
 
 def crossover(parent1, parent2, index):
@@ -63,4 +69,16 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    population = np.random.randint(low = 1, high=9, size=(n, 8), dtype=np.dtype('u1'))
+
+    for i in range(g):
+        new_population = np.empty(shape=(0, 0), dtype=np.dtype('u1'))
+        while len(new_population) < n:
+            participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
+            selected_individual = tournament(population[participants_idx, :])
+            breakpoint()
+
+    print(population)
+    print(f"Memory usage: {population.nbytes} bytes")
+    
+run_ga(10, 10000, 2, 0.3, 5)
