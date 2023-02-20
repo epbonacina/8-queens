@@ -50,7 +50,7 @@ MUTATION_PROB = 0.5
 
 The following figure shows the effect of increasing the value of `GENERATIONS`
 
-![Figure_3](https://user-images.githubusercontent.com/63553534/220205297-a78e26b0-9751-4a1f-a919-cd75b85bf8ce.png)
+![Figure_1](https://user-images.githubusercontent.com/63553534/220207238-06203251-e10c-49d9-ab67-0f48b25c3212.png)
 
 ## Developers
 
