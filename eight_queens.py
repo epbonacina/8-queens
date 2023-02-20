@@ -1,5 +1,10 @@
+import random
+
 import numpy as np
 from numba import jit
+
+CROSSOVER_INDEX = 3
+CROSSOVER_PROB = 0.5
 
 
 def evaluate(individual: np.array):
@@ -44,7 +49,12 @@ def crossover(parent1, parent2, index):
     :param index:int
     :return:list,list
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    if random.uniform(0, 1) < CROSSOVER_PROB:
+        o1 = parent1[:index] + parent2[index:]
+        o2 = parent2[:index] + parent1[index:]
+    else:
+        o1, o2 = parent1, parent2
+    return o1, o2
 
 
 def mutate(individual, m):
@@ -78,6 +88,7 @@ def run_ga(g, n, k, m, e):
             p1 = tournament(population[participants_idx, :])
             participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
             p2 = tournament(population[participants_idx, :])
+            o1, o2 = crossover(p1, p2, CROSSOVER_INDEX)
 
             break
 
