@@ -1,10 +1,11 @@
 import random
 
 import numpy as np
-from numba import jit
 
 CROSSOVER_INDEX = 3
 CROSSOVER_PROB = 0.5
+MUTATION_PROB = 0.5
+INDIVIDUAL_SIZE = 8
 
 
 def evaluate(individual: np.array):
@@ -50,14 +51,14 @@ def crossover(parent1, parent2, index):
     :return:list,list
     """
     if random.uniform(0, 1) < CROSSOVER_PROB:
-        o1 = parent1[:index] + parent2[index:]
-        o2 = parent2[:index] + parent1[index:]
+        o1 = np.concatenate((parent1[:index], parent2[index:]))
+        o2 = np.concatenate((parent2[:index], parent1[index:]))
     else:
         o1, o2 = parent1, parent2
     return o1, o2
 
 
-def mutate(individual, m):
+def mutate(individual, mutation_prob):
     """
     Recebe um indivíduo e a probabilidade de mutação (m).
     Caso random() < m, sorteia uma posição aleatória do indivíduo e
@@ -66,7 +67,12 @@ def mutate(individual, m):
     :param m:int - probabilidade de mutacao
     :return:list - individuo apos mutacao (ou intacto, caso a prob. de mutacao nao seja satisfeita)
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    new_individual = individual.copy()
+    if random.uniform(0, 1) < mutation_prob:
+        for i in range(INDIVIDUAL_SIZE):
+            if random.uniform(0, 1) < 1/INDIVIDUAL_SIZE:
+                new_individual[i] = random.randint(1, INDIVIDUAL_SIZE)
+    return new_individual
 
 
 def run_ga(g, n, k, m, e):
@@ -79,7 +85,7 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    population = np.random.randint(low = 1, high=9, size=(n, 8), dtype=np.dtype('u1'))
+    population = np.random.randint(low = 1, high=9, size=(n, INDIVIDUAL_SIZE), dtype=np.dtype('u1'))
 
     for i in range(g):
         new_population = np.empty(shape=(0, 0), dtype=np.dtype('u1'))
@@ -89,10 +95,9 @@ def run_ga(g, n, k, m, e):
             participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
             p2 = tournament(population[participants_idx, :])
             o1, o2 = crossover(p1, p2, CROSSOVER_INDEX)
-
+            m1, m2 = mutate(o1, MUTATION_PROB), mutate(o2, MUTATION_PROB)
+            new_population = np.append(new_population, m1)
+            new_population = np.append(new_population, m2)
             break
-
-    print(population)
-    print(f"Memory usage: {population.nbytes} bytes")
     
 run_ga(10, 10000, 2, 0.3, 5)
