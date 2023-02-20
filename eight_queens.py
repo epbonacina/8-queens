@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit
 
-@jit(nopython=True)
+
 def evaluate(individual: np.array):
     """
     Recebe um indivíduo (lista de inteiros) e retorna o número de ataques
@@ -76,7 +76,7 @@ def run_ga(g, n, k, m, e):
         while len(new_population) < n:
             participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
             selected_individual = tournament(population[participants_idx, :])
-            breakpoint()
+            break
 
     print(population)
     print(f"Memory usage: {population.nbytes} bytes")
