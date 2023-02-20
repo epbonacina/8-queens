@@ -6,9 +6,7 @@ import numpy as np
 
 CROSSOVER_INDEX = 3
 CROSSOVER_PROB = 0.5
-MUTATION_PROB = 0.5
 INDIVIDUAL_SIZE = 8
-ELITE_SIZE = 5
 
 
 def top_n(individuals, num):
@@ -129,5 +127,3 @@ def run_ga(g, n, k, m, e):
             new_population = np.vstack([new_population, m1, m2])
         population = new_population.copy()
     return top_n(population, 1)
-    
-print(run_ga(10, 100, 2, MUTATION_PROB, ELITE_SIZE))
