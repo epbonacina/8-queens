@@ -1,8 +1,4 @@
 import random
-import traceback
-
-import numpy as np
-
 
 CROSSOVER_INDEX = 3
 CROSSOVER_PROB = 0.5
@@ -18,14 +14,12 @@ def top_n(individuals, num):
     :param num: int
     :return: Union[list[list], list[int]] top n indivíduos
     """
-    if num == 1:
-        top_n_individuals = np.array(sorted(individuals, key=evaluate))[0]
-    else:
-        top_n_individuals = np.array(sorted(individuals, key=evaluate))[:num]
-    return top_n_individuals
+    individuals = individuals.copy()
+    individuals.sort(key=evaluate)
+    return individuals[:num]
 
 
-def evaluate(individual: np.array):
+def evaluate(individual):
     """
     Recebe um indivíduo (lista de inteiros) e retorna o número de ataques
     entre rainhas na configuração especificada pelo indivíduo.
@@ -35,8 +29,8 @@ def evaluate(individual: np.array):
     :return:int numero de ataques entre rainhas no individuo recebido
     """
     conflicts = 0
-    for i in range(individual.shape[0]):
-        for j in range(i+1, individual.shape[0]):
+    for i in range(len(individual)):
+        for j in range(i+1, len(individual)):
             if individual[i] == individual[j] or abs(i-j) == abs(individual[i] - individual[j]):
                 conflicts += 1
     return conflicts
@@ -50,24 +44,24 @@ def select(population, k):
     :param k: int número de participantes do torneio
     :return: tuple tupla com os 2 melhores indivíduos da fatia selecionada
     """
-    participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
-    p1 = tournament(population[participants_idx, :])
-    participants_idx = np.random.choice(population.shape[0], size=k, replace=False)
-    p2 = tournament(population[participants_idx, :])
+    participants = random.sample(population, k)
+    p1 = tournament(participants)
+    participants = random.sample(population, k)
+    p2 = tournament(participants)
     return p1, p2
 
 
-def tournament(participants: np.array):
+def tournament(participants):
     """
     Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
     ao numero de conflitos
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
-    return top_n(participants, 1)
+    return top_n(participants, 1)[0]
 
 
-def crossover(parent1, parent2, index):
+def random_crossover(parent1, parent2, index):
     """
     Realiza o crossover de um ponto: recebe dois indivíduos e o ponto de
     cruzamento (indice) a partir do qual os genes serão trocados. Retorna os
@@ -82,10 +76,15 @@ def crossover(parent1, parent2, index):
     :return:list,list
     """
     if random.uniform(0, 1) < CROSSOVER_PROB:
-        o1 = np.concatenate((parent1[:index], parent2[index:]))
-        o2 = np.concatenate((parent2[:index], parent1[index:]))
+        o1, o2 = crossover(parent1, parent2, index)
     else:
         o1, o2 = parent1, parent2
+    return o1, o2
+
+
+def crossover(parent1, parent2, index):
+    o1 = parent1[:index] + parent2[index:]
+    o2 = parent2[:index] + parent1[index:]
     return o1, o2
 
 
@@ -116,14 +115,17 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    population = np.random.randint(low = 1, high=9, size=(n, INDIVIDUAL_SIZE), dtype=np.dtype('i1'))
+    population = [[random.randint(1, 8) for _ in range(INDIVIDUAL_SIZE)] for _ in range(n)]
 
     for i in range(g):
         new_population = top_n(population, e)
-        while new_population.shape[0] < n:
+        new_population = list()
+        while len(new_population) < n:
             p1, p2 = select(population, k)
-            o1, o2 = crossover(p1, p2, CROSSOVER_INDEX)
+            o1, o2 = random_crossover(p1, p2, CROSSOVER_INDEX)
             m1, m2 = mutate(o1, m), mutate(o2, m)
-            new_population = np.vstack([new_population, m1, m2])
+            new_population.append(m1)
+            new_population.append(m2)
         population = new_population.copy()
-    return top_n(population, 1)
+        avg_fitness = sum([evaluate(individual) for individual in population])/len(population)
+    return top_n(population, 1), top_n(population, len(population))[-1], avg_fitness
