@@ -128,4 +128,4 @@ def run_ga(g, n, k, m, e):
             new_population.append(m2)
         population = new_population.copy()
         avg_fitness = sum([evaluate(individual) for individual in population])/len(population)
-    return top_n(population, 1), top_n(population, len(population))[-1], avg_fitness
+    return top_n(population, 1)[0], top_n(population, len(population))[-1], avg_fitness
