@@ -117,9 +117,9 @@ def run_ga(g, n, k, m, e):
     """
     population = [[random.randint(1, 8) for _ in range(INDIVIDUAL_SIZE)] for _ in range(n)]
 
-    for i in range(g):
+    avg_fitnesses, worst_fitnesses, best_fitnesses = [], [] ,[]
+    for _ in range(g):
         new_population = top_n(population, e)
-        new_population = list()
         while len(new_population) < n:
             p1, p2 = select(population, k)
             o1, o2 = random_crossover(p1, p2, CROSSOVER_INDEX)
@@ -127,5 +127,11 @@ def run_ga(g, n, k, m, e):
             new_population.append(m1)
             new_population.append(m2)
         population = new_population.copy()
-        avg_fitness = sum([evaluate(individual) for individual in population])/len(population)
-    return top_n(population, 1)[0], top_n(population, len(population))[-1], avg_fitness
+        gen_avg_fitness = sum([evaluate(individual) for individual in population])/len(population)
+        gen_wost_fitness = evaluate(top_n(population, len(population))[-1])
+        gen_best_fitness = evaluate(top_n(population, 1)[0])
+
+        avg_fitnesses.append(gen_avg_fitness)
+        worst_fitnesses.append(gen_wost_fitness)
+        best_fitnesses.append(gen_best_fitness)
+    return avg_fitnesses, worst_fitnesses, best_fitnesses
