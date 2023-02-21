@@ -119,7 +119,6 @@ def run_ga(g, n, k, m, e):
 
     for i in range(g):
         new_population = top_n(population, e)
-        new_population = list()
         while len(new_population) < n:
             p1, p2 = select(population, k)
             o1, o2 = random_crossover(p1, p2, CROSSOVER_INDEX)
@@ -127,5 +126,4 @@ def run_ga(g, n, k, m, e):
             new_population.append(m1)
             new_population.append(m2)
         population = new_population.copy()
-        avg_fitness = sum([evaluate(individual) for individual in population])/len(population)
-    return top_n(population, 1)[0], top_n(population, len(population))[-1], avg_fitness
+    return top_n(population, 1)[0]
